@@ -1,5 +1,3 @@
-package GeneticAlgorithm;
-
 /*
     Author: Rogelio Schevenin Jr.
     Course: CS-310 Data Structures
@@ -18,7 +16,7 @@ import java.util.Scanner;
 public class Driver {
 
     public static Map<String, int[]> matrix = new LinkedHashMap<>();
-    public static final boolean SHOW_OUTPUT = false;
+    public static final boolean SHOW_DETAILS = false;
     public static final int MUTATION_ODDS = 5;
     public static final int BREED_BY_FITNESS_ODDS = 97;
 
@@ -88,7 +86,7 @@ public class Driver {
 
             // Displaying information about file to indicate successful graph construction
             System.out.println("Algorithm Test: the cost of going from a to c is " + calculateFitness(matrix, "a", "c") + ".");
-            System.out.println("Displaying more information: " + SHOW_OUTPUT + "\n");
+            System.out.println("Displaying more information: " + SHOW_DETAILS + "\n");
 
             return true;
         } catch (FileNotFoundException e) {
@@ -110,7 +108,7 @@ public class Driver {
             // number of breeding cycles (crossover) operations
             epochs = scanner.nextInt();
 
-            GeneticAlgorithm algorithm = new GeneticAlgorithm(matrix, chromosomes, epochs, SHOW_OUTPUT, MUTATION_ODDS, BREED_BY_FITNESS_ODDS);
+            GeneticAlgorithm algorithm = new GeneticAlgorithm(matrix, chromosomes, epochs, SHOW_DETAILS, MUTATION_ODDS, BREED_BY_FITNESS_ODDS);
             return true;
         } catch (InputMismatchException exception) {
             System.out.println("Could not understand your input. Verify you input is an integer value.\n");

@@ -1,5 +1,3 @@
-package GeneticAlgorithm;
-
 /*
     Author: Rogelio Schevenin Jr.
     Course: CS-310 Data Structures
@@ -9,31 +7,24 @@ package GeneticAlgorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Scanner;
 
 public class GeneticAlgorithm {
-    private static boolean SHOW_OUTPUT;
-    private static int MUTATION_ODDS;
-    private static int BREED_BY_FITNESS_ODDS;
-
+    private static boolean SHOW_DETAILS;
     public static int currentEpoch;
+    public static String epochSpecifier = "[info-epoch-" + currentEpoch + "]";
 
     // Constructor
     public GeneticAlgorithm(Map<String, int[]> matrix, int chromosomes, int epochs, boolean output, int mutationOdds, int breedByFitnessOdds) {
         Map<String[], Integer> epochGenome = null;
         String[] bestChromosome = new String[0];
         int bestFitness = 0, totalCost = 0;
-
-        SHOW_OUTPUT = output;
-        MUTATION_ODDS = mutationOdds;
-        BREED_BY_FITNESS_ODDS = breedByFitnessOdds;
+        SHOW_DETAILS = output;
 
         /*
         Done + As the program progresses, it shall write all output to the terminal window (System.out or std::cout <<).
@@ -46,8 +37,9 @@ public class GeneticAlgorithm {
 
         // for each generation/epoch
         for (int epoch = 1; epoch <= epochs; epoch++) {
-            currentEpoch = epoch;
+            System.out.println();
             System.out.println("=== Epoch " + epoch + " ===");
+            currentEpoch = epoch;
 
             // if initial epoch, generate initial population
             if (epoch == 1) {
@@ -56,10 +48,10 @@ public class GeneticAlgorithm {
                 // generating random genome ranked by fitness (chromosomes, fitness number)
                 Map<String[], Integer> genome = rankFitness(matrix, generateGenome(chromosomes, locations));
                 // epoch genome after mutation of crossovers
-                epochGenome = mutate(matrix, crossover(matrix, genome, BREED_BY_FITNESS_ODDS), MUTATION_ODDS);
+                epochGenome = mutate(matrix, crossover(matrix, genome, breedByFitnessOdds), mutationOdds);
             } else {
                 // epoch genome after mutation of crossovers
-                epochGenome = mutate(matrix, crossover(matrix, epochGenome, BREED_BY_FITNESS_ODDS), MUTATION_ODDS);
+                epochGenome = mutate(matrix, crossover(matrix, epochGenome, breedByFitnessOdds), mutationOdds);
             }
 
             // chromosomes and their fitness from epoch
@@ -100,20 +92,18 @@ public class GeneticAlgorithm {
 
             System.out.println("[info-epoch-" + currentEpoch + "] Most fit path: " + Arrays.toString(bestChromosomeThisEpoch) + " (Cost: " + bestCostThisEpoch + ", Average: " + (totalCostThisEpoch / chromosomeCount) + ")");
 
-            if (SHOW_OUTPUT) {
+            /* pause after each epoch until user input
+            if (SHOW_DETAILS) {
                 System.out.println("PRESS ENTER TO CONTINUE");
                 Scanner s = new Scanner(System.in);
                 String input = s.nextLine();
             } else {
                 System.out.println();
             }
-
+            */
         }
 
-        if (SHOW_OUTPUT) {
-            displayChromosomeCost(matrix, bestChromosome);
-        }
-
+        if (SHOW_DETAILS) displayChromosomeCost(matrix, bestChromosome);
         System.out.println("[all-epochs] Most fit path: " + Arrays.toString(bestChromosome) + " (Cost: " + bestFitness + ")");
 
         /*
@@ -129,7 +119,7 @@ public class GeneticAlgorithm {
     Done + Keeping with the 'genetic' analogy, these sequences are the chromosomes for the algorithm.
      */
     public static LinkedList<String[]> generateGenome(int n, LinkedList<String> locations) {
-        System.out.println("[info-epoch-" + currentEpoch + "] " + "GENERATING INITIAL GENOME");
+        System.out.println(epochSpecifier + " Generating initial genome.");
         LinkedList<String[]> chromosomes = new LinkedList<>();
 
         // make n chromosomes
@@ -138,7 +128,11 @@ public class GeneticAlgorithm {
 
             // add first random chromosome to linked list (nothing to compare to)
             if (i == 0) {
-                chromosomes.add(randomChromosome(locations));
+                chromosome = randomChromosome(locations);
+                chromosomes.add(chromosome);
+
+                // output
+                if (SHOW_DETAILS) System.out.println(epochSpecifier + " Generated random chromosome -> " + Arrays.toString(chromosome) + " (" + i + "/" + n + ")");
             } else {
                 // create new random chromosome
                 chromosome = randomChromosome(locations);
@@ -151,9 +145,8 @@ public class GeneticAlgorithm {
                 // add to list
                 chromosomes.add(chromosome);
 
-                if (SHOW_OUTPUT) {
-                    System.out.println("[info-epoch-" + currentEpoch + "] generated random chromosome -> " + Arrays.toString(chromosome) + " (" + i + "/" + n + ")");
-                }
+                //output
+                if (SHOW_DETAILS) System.out.println(epochSpecifier + " Generated random chromosome -> " + Arrays.toString(chromosome) + " (" + i + "/" + n + ")");
             }
         }
 
@@ -168,6 +161,8 @@ public class GeneticAlgorithm {
      */
     public static Map<String[], Integer> rankFitness(Map<String, int[]> matrix, LinkedList<String[]> chromosomes) {
         Map<String[], Integer> rankedFitness = new LinkedHashMap<>();
+
+        System.out.println(epochSpecifier + " Analyzing fitness of chromosomes.");
 
         // traverse all chromosomes
         for (String[] chromosome : chromosomes) {
@@ -186,6 +181,8 @@ public class GeneticAlgorithm {
             // add last route (from last location to first location) to total fitness of chromosome
             totalFitness += calculateFitness(matrix, chromosome[chromosome.length - 1], chromosome[0]);
 
+            if (SHOW_DETAILS) System.out.println(epochSpecifier + " Analyzed chromosome fitness -> " + Arrays.toString(chromosome) + ": " + totalFitness);
+
             // add sequence and the cost of the sequence to the map
             rankedFitness.put(chromosome, totalFitness);
         }
@@ -201,16 +198,27 @@ public class GeneticAlgorithm {
     public static Map<String[], Integer> crossover(Map<String, int[]> matrix, Map<String[], Integer> genome, int breedByFitnessOdds) {
         LinkedList<String[]> chromosomes = new LinkedList<>(genome.keySet());
 
+        System.out.println(epochSpecifier + " Crossover: Partnering chromosomes for breeding.");
+
         // divide best half of chromosomes into fit list
         LinkedList<String[]> fitChromosomes = new LinkedList<>();
         for (int i = 0; i < chromosomes.size() / 2; i++) {
             fitChromosomes.add(chromosomes.get(i));
+            if (SHOW_DETAILS) System.out.println(epochSpecifier + " Chromosome classified as fit -> " + Arrays.toString(chromosomes.get(i)));
         }
+
+        System.out.println(epochSpecifier + " Crossover: Successfully generated fit chromosomes list.");
+
         // divide best half of chromosomes into non-fit list
         LinkedList<String[]> nonFitChromosomes = new LinkedList<>();
         for (int i = chromosomes.size() / 2; i < chromosomes.size(); i++) {
             nonFitChromosomes.add(chromosomes.get(i));
+            if (SHOW_DETAILS) System.out.println(epochSpecifier + " Chromosome classified as non-fit -> " + Arrays.toString(chromosomes.get(i)));
         }
+
+        System.out.println(epochSpecifier + " Crossover: Successfully generated non-fit chromosomes list.");
+
+        System.out.println(epochSpecifier + " Crossover: Breeding chromosomes.");
 
         // list for chromosomes after preforming crossovers
         LinkedList<String[]> newChromosomes = new LinkedList<>();
@@ -228,35 +236,36 @@ public class GeneticAlgorithm {
 
             // top 10% of fit chromosomes, unless initial population is too small for top 10%, then random from fit list
             int best = (int) (((int) (fitChromosomes.size() * (0.1)) == 0) ? (fitChromosomes.size()) : ((fitChromosomes.size() * (0.1))));
-            // chance that unique non-fit parents breed
+
+            // random chance that unique non-fit parents breed
             int chance = r.nextInt(100);
 
             if (chance < breedByFitnessOdds) {
                 do {
                     firstParent = fitChromosomes.get(r.nextInt(best));
                     secondParent = fitChromosomes.get(r.nextInt(best));
-                } while (firstParent.equals(secondParent));
+                } while (Arrays.equals(firstParent, secondParent));
                 type = "fit";
+
+                if (SHOW_DETAILS) System.out.println(epochSpecifier + " Parent 1 (" + type + ") -> " + Arrays.toString(firstParent) + " + Parent 2 (" + type + ") -> " + Arrays.toString(secondParent));
             } else {
                 do {
                     firstParent = nonFitChromosomes.get(r.nextInt(nonFitChromosomes.size()));
                     secondParent = nonFitChromosomes.get(r.nextInt(nonFitChromosomes.size()));
-                } while (firstParent.equals(secondParent));
+                } while (Arrays.equals(firstParent, secondParent));
                 type = "non-fit";
             }
 
             c = crossoverChromosomes(firstParent, secondParent);
 
+            if (SHOW_DETAILS) System.out.println(epochSpecifier + " Bred child chromosome -> " + Arrays.toString(c) + " (" + newChromosomes.size() + "/" + chromosomes.size() + ")");
+
             if (!containsChromosome(c, newChromosomes)) {
                 newChromosomes.add(c);
             }
-
-            if (SHOW_OUTPUT) {
-                System.out.println("[info-epoch-" + currentEpoch + "] bred " + type + " chromosome -> " + Arrays.toString(c) + " (" + newChromosomes.size() + "/" + chromosomes.size() + ")");
-            }
         }
 
-        System.out.println("[info-epoch-" + currentEpoch + "] " + "Successfully performed crossovers.");
+        System.out.println(epochSpecifier + " Successfully performed crossovers.");
 
         // rank them by fitness and return the genome
         return rankFitness(matrix, newChromosomes);
@@ -270,7 +279,7 @@ public class GeneticAlgorithm {
         LinkedList<String[]> chromosomes = new LinkedList<>(genome.keySet());
         LinkedList<String[]> newChromosomes = new LinkedList<>();
 
-        // adjust mutation odds for smaller
+        // adjust mutation odds for smaller variance
         if (chromosomes.size() <= 10) {
             mutationOdds *= 15;
         } else if (chromosomes.size() <= 100) {
@@ -284,12 +293,10 @@ public class GeneticAlgorithm {
 
         // ensure list of chromosomes did not change
         if (chromosomes.size() == newChromosomes.size()) {
-
-            System.out.println("[info-epoch-" + currentEpoch + "] " + "Successfully performed mutations.");
-
+            System.out.println(epochSpecifier + " Successfully performed mutations.");
             return rankFitness(matrix, newChromosomes);
         } else {
-            System.out.println("[info-epoch-" + currentEpoch + "] Mutation error: size is different for old chromosomes and new chromosomes!");
+            System.out.println(epochSpecifier + " Mutation error: size is different for old chromosomes and new chromosomes!");
             return null;
         }
     }
@@ -399,9 +406,6 @@ public class GeneticAlgorithm {
 
         // chance the chromosome mutates
         if (r.nextInt(100) < mutationOdds) {
-            if (SHOW_OUTPUT) {
-                System.out.println("[info-epoch-" + currentEpoch + "] chromosome mutated -> " + Arrays.toString(chromosome));
-            }
 
             // pick random index to copy
             int swapIndex = r.nextInt(chromosome.length);
@@ -426,8 +430,10 @@ public class GeneticAlgorithm {
             for (int z = 0; z < chromosome.length; z++) {
                 chromosome[z] = String.valueOf(original[z]);
             }
-        }
 
+            if (SHOW_DETAILS) System.out.println(epochSpecifier + " Mutation: Chromosome mutated -> " + Arrays.toString(chromosome));
+
+        }
 
         return chromosome;
     }
@@ -436,7 +442,7 @@ public class GeneticAlgorithm {
     private static boolean containsChromosome(String[] target, LinkedList<String[]> chromosomes) {
 
         // sort
-        Collections.sort(chromosomes, Comparator.comparing(o -> o[1]));
+        chromosomes.sort(Comparator.comparing(o -> o[1]));
 
         // search
         for (String[] chromosome : chromosomes) {
@@ -444,6 +450,7 @@ public class GeneticAlgorithm {
                 return true;
             }
         }
+
         return false;
     }
 
