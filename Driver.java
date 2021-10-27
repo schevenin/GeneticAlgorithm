@@ -7,25 +7,26 @@
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.InputMismatchException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Driver {
 
     public static Map<String, int[]> matrix = new LinkedHashMap<>();
-    public static final boolean SHOW_DETAILS = true;
-    public static final boolean PAUSE = true;
+    public static boolean SHOW_DETAILS;
+    public static boolean PAUSE;
     public static final int MUTATION_ODDS = 5;
     public static final int BREED_BY_FITNESS_ODDS = 97;
 
     public static void main(String[] args) {
+
+        SHOW_DETAILS = args[1].equals("true");
+        PAUSE = args[2].equals("true");
+
         // exit if unable to read file
-        if (!readFile(args)) {
+        if (!readFile(args[0])) {
             System.exit(0);
         }
+
         // until the algorithm completes, rerun algorithm
         while (!runAlgorithm()) {
             System.out.println("Running algorithm again.");
@@ -33,15 +34,9 @@ public class Driver {
     }
 
     // readFile: take file from input and create a matrix/graph out of it
-    public static boolean readFile(String[] args) {
-        // If no args provided
-        if (args.length == 0) {
-            System.out.println("Program Usage: java Driver {Path to file}");
-            return false;
-        }
-
+    public static boolean readFile(String file) {
         // Find file from args
-        File text = new File(args[0]);
+        File text = new File(file);
 
         // Check file
         Scanner scanner;
@@ -87,7 +82,8 @@ public class Driver {
 
             // Displaying information about file to indicate successful graph construction
             System.out.println("Algorithm Test: the cost of going from a to c is " + calculateFitness(matrix, "a", "c") + ".");
-            System.out.println("Displaying more information: " + SHOW_DETAILS + "\n");
+            System.out.println("Displaying more information: " + SHOW_DETAILS);
+            System.out.println("Pause after each epoch: " + PAUSE + "\n");
 
             return true;
         } catch (FileNotFoundException e) {
