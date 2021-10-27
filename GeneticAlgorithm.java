@@ -1,4 +1,4 @@
-package GeneticAlgorithms;
+package GeneticAlgorithm;
 
 /*
     Author: Rogelio Schevenin Jr.
@@ -74,9 +74,6 @@ public class GeneticAlgorithm {
             // for chromosomes in genome
             for (String[] chromosome : chromosomesThisEpoch) {
 
-                // user information (optional) - shows all chromosomes and their costs
-                //System.out.println(Arrays.toString(chromosome) + " (Cost: " + fitnessesThisEpoch.get(chromosomeCount) + ")");
-
                 // add up all chromosome costs
                 totalCostThisEpoch += fitnessesThisEpoch.get(chromosomeCount);
                 totalCost += fitnessesThisEpoch.get(chromosomeCount);
@@ -91,7 +88,7 @@ public class GeneticAlgorithm {
                 chromosomeCount++;
             }
 
-            // if first epoch, initialize best chromosome and fitness
+            // if first epoch, initialize the best chromosome and fitness
             // else if current epoch best is better than overall best, replace the overall best
             if (epoch == 1) {
                 bestChromosome = bestChromosomeThisEpoch;
@@ -101,9 +98,7 @@ public class GeneticAlgorithm {
                 bestFitness = bestCostThisEpoch;
             }
 
-            System.out.println();
-            System.out.println("[this epoch] most fit path: " + Arrays.toString(bestChromosomeThisEpoch) + " (Cost: " + bestCostThisEpoch + ", Average: " + (totalCostThisEpoch / chromosomeCount) + ")");
-            System.out.println("[all epochs] most fit path: " + Arrays.toString(bestChromosome) + " (Cost: " + bestFitness + ", Average: " + totalCost / (chromosomes*epoch) + ")");
+            System.out.println("[info-epoch-" + currentEpoch + "] Most fit path: " + Arrays.toString(bestChromosomeThisEpoch) + " (Cost: " + bestCostThisEpoch + ", Average: " + (totalCostThisEpoch / chromosomeCount) + ")");
 
             if (SHOW_OUTPUT) {
                 System.out.println("PRESS ENTER TO CONTINUE");
@@ -114,6 +109,12 @@ public class GeneticAlgorithm {
             }
 
         }
+
+        if (SHOW_OUTPUT) {
+            displayChromosomeCost(matrix, bestChromosome);
+        }
+
+        System.out.println("[all-epochs] Most fit path: " + Arrays.toString(bestChromosome) + " (Cost: " + bestFitness + ")");
 
         /*
         Done + The program shall terminate after it completes the number of steps established by the user when the program launched.
@@ -198,7 +199,6 @@ public class GeneticAlgorithm {
     Done + The strategy for partnering up chromosomes varies with each solution, but generally the more fit chromosomes have a greater chance of breeding than the less fit ones, but research suggests including a few of the less-fit chromosomes in the breeding cycle can lead to a better solution.
      */
     public static Map<String[], Integer> crossover(Map<String, int[]> matrix, Map<String[], Integer> genome, int breedByFitnessOdds) {
-        System.out.println("[info-epoch-" + currentEpoch + "] " + "PERFORMING CROSSOVERS");
         LinkedList<String[]> chromosomes = new LinkedList<>(genome.keySet());
 
         // divide best half of chromosomes into fit list
@@ -256,6 +256,8 @@ public class GeneticAlgorithm {
             }
         }
 
+        System.out.println("[info-epoch-" + currentEpoch + "] " + "Successfully performed crossovers.");
+
         // rank them by fitness and return the genome
         return rankFitness(matrix, newChromosomes);
     }
@@ -265,7 +267,6 @@ public class GeneticAlgorithm {
     Done + For a mutation, simply flip the positions of two nodes in the sequence.
      */
     public static Map<String[], Integer> mutate(Map<String, int[]> matrix, Map<String[], Integer> genome, int mutationOdds) {
-        System.out.println("[info-epoch-" + currentEpoch + "] " + "PERFORMING MUTATIONS");
         LinkedList<String[]> chromosomes = new LinkedList<>(genome.keySet());
         LinkedList<String[]> newChromosomes = new LinkedList<>();
 
@@ -283,9 +284,12 @@ public class GeneticAlgorithm {
 
         // ensure list of chromosomes did not change
         if (chromosomes.size() == newChromosomes.size()) {
+
+            System.out.println("[info-epoch-" + currentEpoch + "] " + "Successfully performed mutations.");
+
             return rankFitness(matrix, newChromosomes);
         } else {
-            System.out.println("Mutation error: size is different for old chromosomes and new chromosomes!");
+            System.out.println("[info-epoch-" + currentEpoch + "] Mutation error: size is different for old chromosomes and new chromosomes!");
             return null;
         }
     }
@@ -460,5 +464,34 @@ public class GeneticAlgorithm {
         }
 
         return costs[posB];
+    }
+
+    // displayCost: prints a breakdown of the cost of the path a chromosome takes
+    public static void displayChromosomeCost(Map<String, int[]> matrix, String[] chromosome) {
+        int fitness = 0;
+        int totalFitness = 0;
+        String a = "";
+        String b = "";
+        int cost = 0;
+
+        // traverse all locations in chromosome
+        for (int i = 0; i < chromosome.length; i++) {
+            // if not last in chromosome
+            if (i != chromosome.length - 1) {
+                a = chromosome[i];
+                b = chromosome[i+1];
+            } else {
+                a = chromosome[i];
+                b = chromosome[i];
+            }
+
+            fitness = calculateFitness(matrix, a, b);
+            totalFitness += fitness;
+            System.out.println("[" + a + "] to [" + b + "]: $" + calculateFitness(matrix,a,b));
+        }
+
+        // add last route (from last location to first location) to total fitness of chromosome
+        totalFitness += calculateFitness(matrix, chromosome[chromosome.length - 1], chromosome[0]);
+        System.out.println("[" + chromosome[chromosome.length - 1] + "] to [" + chromosome[0] + "]: $" + calculateFitness(matrix, chromosome[chromosome.length - 1], chromosome[0]));
     }
 }

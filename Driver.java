@@ -1,4 +1,4 @@
-package GeneticAlgorithms;
+package GeneticAlgorithm;
 
 /*
     Author: Rogelio Schevenin Jr.
@@ -87,8 +87,8 @@ public class Driver {
             System.out.println("Successfully loaded adjacency matrix!\nFound " + count + " locations in file.");
 
             // Displaying information about file to indicate successful graph construction
-            System.out.println("Test: the cost of going from a to b is " + calculateFitness(matrix, "a", "b") + ".");
-            System.out.println("Showing extra information (" + SHOW_OUTPUT + ")\n");
+            System.out.println("Algorithm Test: the cost of going from a to c is " + calculateFitness(matrix, "a", "c") + ".");
+            System.out.println("Displaying more information: " + SHOW_OUTPUT + "\n");
 
             return true;
         } catch (FileNotFoundException e) {
