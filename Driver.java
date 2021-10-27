@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class Driver {
 
     public static Map<String, int[]> matrix = new LinkedHashMap<>();
-    public static final boolean SHOW_DETAILS = false;
+    public static final boolean SHOW_DETAILS = true;
     public static final int MUTATION_ODDS = 5;
     public static final int BREED_BY_FITNESS_ODDS = 97;
 
