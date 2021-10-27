@@ -99,7 +99,7 @@ public class GeneticAlgorithm {
 
                 // pause for 5 seconds
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1500);
                     System.out.println();
                 } catch(InterruptedException ex) {
                     Thread.currentThread().interrupt();
