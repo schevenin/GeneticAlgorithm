@@ -17,14 +17,16 @@ import java.util.Scanner;
 
 public class GeneticAlgorithm {
     private final boolean SHOW_DETAILS;
+    private final boolean PAUSE;
     public int currentEpoch;
 
     // Constructor
-    public GeneticAlgorithm(Map<String, int[]> matrix, int chromosomes, int epochs, boolean output, int mutationOdds, int breedByFitnessOdds) {
+    public GeneticAlgorithm(Map<String, int[]> matrix, int chromosomes, int epochs, int mutationOdds, int breedByFitnessOdds, boolean output, boolean pause) {
         Map<String[], Integer> epochGenome = null;
         String[] bestChromosome = new String[0];
         int bestFitness = 0, totalCost = 0;
         SHOW_DETAILS = output;
+        PAUSE = pause;
 
         /*
         Done + As the program progresses, it shall write all output to the terminal window (System.out or std::cout <<).
@@ -93,10 +95,22 @@ public class GeneticAlgorithm {
             System.out.println("[info-epoch-" + currentEpoch + "]" + " Most fit path: " + Arrays.toString(bestChromosomeThisEpoch) + " (Cost: " + bestCostThisEpoch + ", Average: " + (totalCostThisEpoch / chromosomeCount) + ")");
 
             // pause after each epoch until user input
-            if (SHOW_DETAILS) {
-                System.out.println("PRESS ENTER TO CONTINUE");
-                Scanner s = new Scanner(System.in);
-                String input = s.nextLine();
+            if (PAUSE) {
+
+                // pause for 5 seconds
+                try {
+                    Thread.sleep(5000);
+                    System.out.println();
+                } catch(InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+
+                /* require user input to continue
+                * System.out.println("PRESS ENTER TO CONTINUE");
+                * Scanner s = new Scanner(System.in);
+                * String input = s.nextLine();
+                * */
+
             } else {
                 System.out.println();
             }

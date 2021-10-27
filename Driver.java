@@ -17,6 +17,7 @@ public class Driver {
 
     public static Map<String, int[]> matrix = new LinkedHashMap<>();
     public static final boolean SHOW_DETAILS = true;
+    public static final boolean PAUSE = true;
     public static final int MUTATION_ODDS = 5;
     public static final int BREED_BY_FITNESS_ODDS = 97;
 
@@ -108,7 +109,7 @@ public class Driver {
             // number of breeding cycles (crossover) operations
             epochs = scanner.nextInt();
 
-            GeneticAlgorithm algorithm = new GeneticAlgorithm(matrix, chromosomes, epochs, SHOW_DETAILS, MUTATION_ODDS, BREED_BY_FITNESS_ODDS);
+            GeneticAlgorithm algorithm = new GeneticAlgorithm(matrix, chromosomes, epochs, MUTATION_ODDS, BREED_BY_FITNESS_ODDS, SHOW_DETAILS, PAUSE);
             return true;
         } catch (InputMismatchException exception) {
             System.out.println("Could not understand your input. Verify you input is an integer value.\n");
